@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+    <head><link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <style>
+        .container {
+  display: flex;
+  justify-content: space-between;
+}
+.container div {
+  width: 100%;
+  padding: 5px;
+  border: 1px solid black;
+}
+    </style>
+    </head>
+<body>
+
+Enter song name: <input type="text" name="txt" value="Hello" id="val">
+<input type="button" value="search" onclick="myFunction()">
+<br><br>
+<div class="container">
+    <div class="list-group track-list">
+        <label for="myt">Tracks</label>
+        <ul id="myt">
+            <li>tracks</li>
+        </ul>
+    </div>
+    <div class="list-group artist-list">
+        <label for="mya">Artists</label>
+        <ul id="mya">
+            <li>artists</li>
+        </ul>
+    </div>
+    <div id="song-detail">3</div>
+  </div>
+<script>
+
+const clientId = '5930433949a445d9a53e40c05ce8a3ac';
+const clientSecret = '0d87c642633e46488087f2c7070852a6';
+
+//str.includes("world")
+
+// if(!window.location.href.includes("?code=")){ 
+//     window.open("https://accounts.spotify.com/authorize?client_id=5930433949a445d9a53e40c05ce8a3ac&response_type=code&redirect_uri=https%3A%2F%2Fsairamreddy2211.github.io%2F&scope=user-read-private%20user-read-email&state=34fFs29kd09");
+    
+// }else{ 
+//     var url_string = window.location.href; //window.location.href
+//     var url = new URL(url_string);
+//     var c = url.searchParams.get("code");
+//     console.log(c);
+// }
+// //p---------------------------
+// const formData = new FormData();
+// formData.append('grant_type', 'authorization_code');
+// formData.append('code', c);
+// formData.append('redirect_uri','https://sairamreddy2211.github.io/')
+
+// const _getToken = async () => {
+
+// const result = await fetch('https://accounts.spotify.com/api/token', {
+//     method: 'POST',
+//     //mode: 'cors', // no-cors, *cors, same-origin
+//     headers: {
+//         'Content-Type' : 'application/x-www-form-urlencoded', 
+//         'Authorization' : 'Basic ' + btoa(clientId + ':' + clientSecret)
+//     },
+//     body: formData
+    
+    
+// });
+
+// const data = await result.json();
+// return data.access_token;
+// }
+
+
+// p----------------------------
+const _getToken = async () => {
+
+const result = await fetch('https://accounts.spotify.com/api/token', {
+    method: 'POST',
+    headers: {
+        'Content-Type' : 'application/x-www-form-urlencoded', 
+        'Authorization' : 'Basic ' + btoa(clientId + ':' + clientSecret)
+    },
+    body: 
+        'grant_type=client_credentials'
+    
+    
+});
+
+const data = await result.json();
+return data.access_token;
+}
+
+
+function myFunction() {
+//   token=_getToken().then(return)
+val=document.getElementById("val").value;
+console.log(val)
+    const _searchsong = async (token,name) => {
+        token = await _getToken();
+
+const result = await fetch(`https://cors-anywhere.herokuapp.com/https://api.spotify.com/v1/search?q=${name}&type=track%2Cartist&market=US&limit=10&offset=5`, {
+method: 'GET',
+headers: { 
+    'Access-Control-Allow-Origin':'no-cors',
+    'Authorization' : 'Bearer ' + token}
+});
+
+const data = await result.json();
+console.log(data)
+//console.log(data.artists.items);
+
+for (i = 0; i < 10; i++) {
+    
+    //console.log(data.artists.items[i].name)
+    if(!data.artists.items[0]){ 
+        var n1=''
+        var uri1=""
+    }else{ 
+        n1=data.artists.items[i].name;
+        uri1="https://scannables.scdn.co/uri/plain/png/000000/white/640/"+data.artists.items[i].uri
+    }
+    
+    if(!data.tracks.items[0]){ 
+       var n2=''
+    }else{ 
+        n2=data.tracks.items[i].name;
+    }
+    //------
+    if(n1!=''){
+    if(!data.artists.items[i].images[0]){ 
+        var a=''
+    }else{ 
+        a=data.artists.items[i].images[0].url;
+    }
+    }
+    if(n2!=''){
+    if(!data.tracks.items[i].album.images[0]){ 
+       var t=''
+       var uri2=''
+    }else{ 
+        t=data.tracks.items[i].album.images[0].url;
+        uri2="https://scannables.scdn.co/uri/plain/png/000000/white/640/"+data.tracks.items[i].uri;
+
+    }
+    }
+
+    
+
+    newElement(n1,"mya",a,uri1,"artist")
+    newElement(n2,"myt",t,uri2,"track")
+
+}
+
+function newElement(e,ele,iurl,surl,srcc) {
+  var li = document.createElement("li");
+  var inputValue = e;
+  var t = document.createTextNode(inputValue);
+  li.appendChild(t);
+  var res = surl.split(":");
+  var res=res[res.length-1];
+  var srcc="https://open.spotify.com/embed/"+srcc+"/"+res;
+  li.addEventListener("click", function() {
+    const html = 
+            `
+            <div class="row col-sm-12 px-0">
+                <img height=100px width=100px src="${iurl}" alt="">        
+            </div>
+            <div class="row col-sm-12 px-0">
+                <img src="${surl}" alt="">        
+            </div>
+            <div class="row col-sm-12 px-0">
+                <label for="Genre" class="form-label col-sm-12">${e}:</label>
+            </div>
+            <div class="row col-sm-12 px-0">
+                <label for="artist" class="form-label col-sm-12">By ${surl}:</label>
+            </div> 
+            <iframe src= ${srcc} width="300" height="380" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
+            `;
+
+  document.getElementById("song-detail").innerHTML = html;
+
+});
+
+document.getElementById(ele).appendChild(li);
+}
+
+
+    }  
+    document.getElementById("mya").innerHTML = "";
+    document.getElementById("myt").innerHTML = "";
+_searchsong('',val);
+}
+
+
+
+    
+</script>
+
+</body>
+</html>
